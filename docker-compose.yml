@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+
+#  resman-mq-adapter:
+#    build:
+#      context: ./
+#      dockerfile: Dockerfile
+#    ports:
+#      - 8080:8080
+#    environment:
+#      - IBM_MQ_CONN_NAME=mqserver(1414)
+#    depends_on:
+#      - "mqserver"
+
+  mqserver:
+    build:
+      context: ./ibm-mq-reservations/
+      dockerfile:
+        Dockerfile
+    ports:
+      - "1414:1414"
+      - "9443:9443"
+    container_name: mqserver
+    environment:
+      - LICENSE=accept
+      - MQ_QMGR_NAME=QM1
+    stdin_open: true
+    tty: true
+    restart: always
