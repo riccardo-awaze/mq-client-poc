@@ -1,3 +1,0 @@
-
-* Define custom queues
-DEFINE QLOCAL('AWZ.RESVMGR.BOK.DEV') REPLACE
