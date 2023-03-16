@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.jms.core.JmsTemplate
 import org.springframework.test.context.ActiveProfiles
 import org.testcontainers.containers.FixedHostPortGenericContainer
+import org.testcontainers.containers.GenericContainer
 import java.util.concurrent.TimeUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -19,13 +20,17 @@ import java.util.concurrent.TimeUnit
 @ActiveProfiles("dev")
 class MessageListenerTest {
 
-    fun setupMqContainer(): FixedHostPortGenericContainer<*>? {
+    fun setupMqContainer(): GenericContainer<*>? {
         val environmentVariables = mapOf("LICENSE" to "accept", "MQ_QMGR_NAME" to "QM1")
 
-        val mqContainer = FixedHostPortGenericContainer("ibmcom/mq:9.1.5.0-r2").withFixedExposedPort(1414, 1414)
+        val mqContainer = GenericContainer("ibmcom/mq:9.1.5.0-r2").withExposedPorts(1414, 1414)
             .withExtraHost("localhost", "0.0.0.0").withEnv(environmentVariables);
 
         mqContainer.start()
+        val host = mqContainer.host;
+        val port = mqContainer.getMappedPort(1414).toString()
+        System.setProperty("ibm.mq.connName", "$host($port)");
+
         return mqContainer;
     }
 

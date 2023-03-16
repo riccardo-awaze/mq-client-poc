@@ -15,7 +15,7 @@ class MessageListener {
     @Throws(JMSException::class)
     fun receive(message: Message) {
         val textMessage: TextMessage = message as TextMessage
-        println("### Received message response : " + textMessage.getText())
+        println("### Received message response : " + textMessage.text)
         messageCounter++
     }
 
