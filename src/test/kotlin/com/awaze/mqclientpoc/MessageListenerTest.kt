@@ -13,6 +13,8 @@ import org.springframework.jms.core.JmsTemplate
 import org.springframework.test.context.ActiveProfiles
 import org.testcontainers.containers.FixedHostPortGenericContainer
 import org.testcontainers.containers.GenericContainer
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 import java.util.concurrent.TimeUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -42,13 +44,18 @@ class MessageListenerTest {
     @Autowired
     private lateinit var messageListener: MessageListener
 
+    private val standardOut = System.out
+    private val printlnSpy: ByteArrayOutputStream = ByteArrayOutputStream()
+
     @BeforeEach
     fun setup() {
-        assertTrue(container!!.isRunning())
+        System.setOut(PrintStream(printlnSpy));
+        assertTrue(container!!.isRunning)
     }
 
     @AfterAll
     fun tearDown() {
+        System.setOut(standardOut);
         container!!.stop()
     }
 
@@ -56,13 +63,17 @@ class MessageListenerTest {
     @Throws(JMSException::class)
     fun `should receive a message from MQ`() {
         // Given
-        assertEquals(0, messageListener.messageCounter);
+        val message = "TEST123"
 
         // When
-        val message = "TEST123"
         jmsTemplate.convertAndSend("DEV.QUEUE.1", message)
 
         // Then a message response is placed on the response queue
-        await().atMost(10, TimeUnit.SECONDS).untilAsserted { assertEquals(1, messageListener.messageCounter); }
+        await().atMost(10, TimeUnit.SECONDS).untilAsserted {
+            assertEquals(
+                "Received message response: TEST123", printlnSpy.toString()
+                    .trim()
+            );
+        }
     }
 }
